@@ -1,5 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import api from './api';
+import Post from './Post';
+import Stories from './Stories';
+
 
 function Feed() {
   const [posts, setPosts] = useState([]);
@@ -41,7 +44,52 @@ function Feed() {
     }
   }, [nextUrl, loadingMore]);
 
-  
+
+  const handleLike = async (postId) => {
+  try {
+    await api.post(`/posts/${postId}/likes`);
+
+    setPosts((prevPosts) =>
+      prevPosts.map((post) => {
+        if (post.id !== postId) return post; 
+
+        return {
+          ...post,
+          is_liked_by_user: !post.is_liked_by_user,
+          likes_count: post.is_liked_by_user
+            ? post.likes_count - 1
+            : post.likes_count + 1,
+        };
+      })
+    );
+  } catch (err) {
+    console.error('Failed to toggle like', err);
+  }
+};
+
+
+const handleFollow = async (userId) => {
+  try {
+    await api.post(`/users/${userId}/follow`);
+
+    setPosts((prevPosts) =>
+      prevPosts.map((post) => {
+        if (post.author.id !== userId) return post;
+        return {
+          ...post,
+          author: {
+            ...post.author,
+            is_following: !post.author.is_following,
+          },
+        };
+      })
+    );
+  } catch (err) {
+    alert(err.response?.data?.message || 'Failed to follow user'); 
+  }
+};
+
+
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -63,37 +111,14 @@ function Feed() {
   if (loading) return <p>Loading...</p>;
   if (error) return <p>{error}</p>;
 
+
   return (
     <div>
-      {posts.map((post) => (
-  <div key={post.id} style={{ border: '1px solid #ccc', margin: '10px', padding: '10px' }}>
-    <p><strong>{post.author.name}</strong> · {post.created_at}</p>
-    <p>{post.title}</p>
-    <p>{post.body}</p>
-
-    {post.media.map((item, index) => {
-      if (item.type === 'image') {
-        return (
-          <img
-            key={index}
-            src={item.content}
-            loading="lazy"
-            alt={post.title}
-            style={{ maxWidth: '100%', display: 'block', margin: '8px 0' }}
-          />
-        );
-      }
-      if (item.type === 'text') {
-        return <p key={index}>{item.content}</p>;
-      }
-      return null; 
-    })}
-
-    <p>{post.likes_count} likes</p>
-  </div>
+      <Stories />
+     {posts.map((post) => (
+  <Post key={post.id} post={post} onLike={handleLike} onFollow={handleFollow} />
 ))}
-
-      <div ref={observerTarget} style={{ height: '20px' }}>
+     <div ref={observerTarget} style={{ height: '20px' }}>
         {loadingMore && <p>Loading more...</p>}
       </div>
     </div>
