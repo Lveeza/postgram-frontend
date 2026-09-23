@@ -2,7 +2,8 @@ import { useState } from "react";
 import api from "./api";
 import { useNavigate } from "react-router-dom";
 
-function Login() {
+function Register() {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -13,36 +14,40 @@ function Login() {
     setError("");
 
     try {
-      const response = await api.post("/login", { email, password });
-      const token = response.data.access_token;
-      localStorage.setItem("token", token);
-
-      const userResponse = await api.get("/user");
-      localStorage.setItem("userId", userResponse.data.id);
-
-      navigate("/feed");
+      await api.post("/register", { name, email, password });
+      navigate("/login");
     } catch (err) {
-      setError(err.response?.data?.message || "Login failed");
+      setError(err.response?.data?.message || "Registration failed");
     }
   };
+
   return (
     <form onSubmit={handleSubmit}>
+      <input
+        type="text"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        placeholder="Name"
+      />
+      <br />
       <input
         type="email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         placeholder="Email"
       />
+      <br />
       <input
         type="password"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         placeholder="Password"
       />
+      <br />
       {error && <p style={{ color: "red" }}>{error}</p>}
-      <button type="submit">Log In</button>
+      <button type="submit">Register</button>
     </form>
   );
 }
 
-export default Login;
+export default Register;

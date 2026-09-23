@@ -128,7 +128,7 @@ function Stories() {
         ))}
       </div>
 
-      {/* Story viewer — only shows when a bubble is clicked */}
+      {/* Story viewer */}
       {activeStory && (
         <div
           onClick={nextStory}
