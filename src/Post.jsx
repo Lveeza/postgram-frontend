@@ -1,6 +1,7 @@
 import { useState } from "react";
 import api from "./api";
 import CreateComment from "./CreateComment";
+import { Link } from "react-router-dom";
 
 function Post({
   post,
@@ -93,12 +94,31 @@ function Post({
   return (
     <div style={{ border: "1px solid #ccc", margin: "10px", padding: "10px" }}>
       <p>
-        <strong>{post.author.name}</strong> · {post.created_at}
+        {post.author.avatar_url && (
+          <img
+            src={post.author.avatar_url}
+            alt={post.author.name}
+            style={{
+              width: "32px",
+              height: "32px",
+              borderRadius: "50%",
+              objectFit: "cover",
+              verticalAlign: "middle",
+              marginRight: "8px",
+            }}
+          />
+        )}
+        <Link to={`/profile/${post.author.id}`}>
+          <strong>{post.author.name}</strong>
+        </Link>
+        {" · "}
+        {post.created_at}
       </p>
-
-      <button onClick={() => onFollow(post.author.id)}>
-        {post.author.is_following ? "Unfollow" : "Follow"}
-      </button>
+      {!isOwner && (
+        <button onClick={() => onFollow(post.author.id)}>
+          {post.author.is_following ? "Unfollow" : "Follow"}
+        </button>
+      )}
 
       {isOwner && (
         <div>
@@ -162,6 +182,7 @@ function Post({
             <video
               src={currentMedia.content}
               controls
+              autoPlay
               style={{ maxWidth: "100%", display: "block", margin: "8px 0" }}
             />
           )}

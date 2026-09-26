@@ -1,9 +1,10 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import Login from './Login';
-import Feed from './Feed';
-import Register from './Register';
-import Search from './Search';
-import ProtectedRoute from './ProtectedRoute';
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import Login from "./Login";
+import Feed from "./Feed";
+import Register from "./Register";
+import Search from "./Search";
+import ProtectedRoute from "./ProtectedRoute";
+import Profile from "./Profile";
 
 function App() {
   return (
@@ -21,6 +22,14 @@ function App() {
           }
         />
         <Route path="/search" element={<Search />} />
+        <Route
+          path="/profile/:userId"
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );

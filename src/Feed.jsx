@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import api from "./api";
 import Post from "./Post";
 import Stories from "./Stories";
-import CreatePost from "./CreatePost";
+import Logout from "./Logout";
 
 function Feed() {
   const [posts, setPosts] = useState([]);
@@ -85,9 +85,7 @@ function Feed() {
     }
   };
 
-  const handlePostCreated = (newPost) => {
-    setPosts((prevPosts) => [newPost, ...prevPosts]);
-  };
+ 
 
   const handleDeletePost = async (postId) => {
     if (!window.confirm("Delete this post?")) return;
@@ -126,14 +124,14 @@ function Feed() {
   };
 
   const handleCommentDeleted = (postId) => {
-  setPosts((prevPosts) =>
-    prevPosts.map((post) =>
-      post.id === postId
-        ? { ...post, comments_count: post.comments_count - 1 }
-        : post
-    )
-  );
-};
+    setPosts((prevPosts) =>
+      prevPosts.map((post) =>
+        post.id === postId
+          ? { ...post, comments_count: post.comments_count - 1 }
+          : post,
+      ),
+    );
+  };
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -158,8 +156,8 @@ function Feed() {
 
   return (
     <div>
+      <Logout />
       <Stories />
-      <CreatePost onPostCreated={handlePostCreated} />
       {posts.map((post) => (
         <Post
           key={post.id}

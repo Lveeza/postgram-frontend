@@ -19,6 +19,7 @@ function Login() {
 
       const userResponse = await api.get("/user");
       localStorage.setItem("userId", userResponse.data.id);
+      localStorage.setItem("userName", userResponse.data.name);
 
       navigate("/feed");
     } catch (err) {

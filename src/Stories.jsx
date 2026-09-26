@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import api from "./api";
+import CreateStory from "./CreateStory";
 
 function Stories() {
   const [storyGroups, setStoryGroups] = useState([]);
@@ -12,6 +13,9 @@ function Stories() {
   const activeStory = activeGroup
     ? activeGroup.stories[activeStoryIndex]
     : null;
+
+  const currentStoryUserId = Number(localStorage.getItem("userId"));
+  const isOwner = activeStory?.user_id === currentStoryUserId;
 
   useEffect(() => {
     const fetchStories = async () => {
@@ -49,7 +53,7 @@ function Stories() {
 
     const recordView = async () => {
       try {
-        await api.post(`/stories/${activeStory.id}/views`);
+        const response = await api.post(`/stories/${activeStory.id}/views`);
 
         setViewedStoryIds((prev) => new Set(prev).add(activeStory.id));
 
@@ -58,7 +62,7 @@ function Stories() {
             ...group,
             stories: group.stories.map((story) =>
               story.id === activeStory.id
-                ? { ...story, views_count: story.views_count + 1 }
+                ? { ...story, views_count: response.data.views_count }
                 : story,
             ),
           })),
@@ -96,9 +100,63 @@ function Stories() {
     }
   };
 
+  const currentUserId = Number(localStorage.getItem("userId"));
+
+  const handleStoryCreated = (newStories) => {
+    const normalizedStories = newStories.map((story) => ({
+      ...story,
+      likes_count: 0,
+      views_count: 0,
+      is_liked_by_user: false,
+    }));
+
+    setStoryGroups((prevGroups) => {
+      const existingGroupIndex = prevGroups.findIndex(
+        (group) => group.author.id === currentUserId,
+      );
+
+      if (existingGroupIndex !== -1) {
+        return prevGroups.map((group, index) =>
+          index === existingGroupIndex
+            ? { ...group, stories: [...group.stories, ...normalizedStories] }
+            : group,
+        );
+      } else {
+        const newGroup = {
+          author: { id: currentUserId, name: localStorage.getItem("userName") },
+          stories: normalizedStories,
+        };
+        return [...prevGroups, newGroup];
+      }
+    });
+  };
+
+  const handleDeleteStory = async () => {
+  try {
+    await api.delete(`/stories/${activeStory.id}`);
+
+    setStoryGroups((prevGroups) =>
+      prevGroups
+        .map((group, index) => {
+          if (index !== activeGroupIndex) return group;
+          return {
+            ...group,
+            stories: group.stories.filter((story) => story.id !== activeStory.id),
+          };
+        })
+        .filter((group) => group.stories.length > 0)
+    );
+
+    closeViewer();
+  } catch (err) {
+    console.error("Failed to delete story", err);
+  }
+};
+
   return (
     <div>
       {/* Bubble strip */}
+      <CreateStory onStoryCreated={handleStoryCreated} />
       <div
         style={{
           display: "flex",
@@ -159,6 +217,12 @@ function Stories() {
             Close
           </button>
 
+          {isOwner && (
+            <div>
+              <button onClick={handleDeleteStory}>Delete Story</button>
+            </div>
+          )}
+
           {activeStory.type === "text" && (
             <p
               style={{ fontSize: "24px", padding: "20px", textAlign: "center" }}
@@ -170,6 +234,14 @@ function Stories() {
             <img
               src={activeStory.content}
               alt="Story"
+              style={{ maxWidth: "90%", maxHeight: "90%" }}
+            />
+          )}
+          {activeStory.type === "video" && (
+            <video
+              src={activeStory.content}
+              controls
+              autoPlay
               style={{ maxWidth: "90%", maxHeight: "90%" }}
             />
           )}

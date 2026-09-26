@@ -1,12 +1,16 @@
 import { useState } from "react";
 import api from "./api";
 
-function CreatePost({ onPostCreated}) {
+function CreatePost({ onPostCreated }) {
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [caption, setCaption] = useState("");
   const [imageFile, setImageFile] = useState(null);
   const [videoFile, setVideoFile] = useState(null);
+  
+  // 1. ADDED THIS LINE:
+  const [contentType, setContentType] = useState("text");
+
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -50,11 +54,13 @@ function CreatePost({ onPostCreated}) {
 
       const response = await api.post("/posts", formData);
 
+      // Reset form fields
       setTitle("");
       setBody("");
       setCaption("");
       setImageFile(null);
       setVideoFile(null);
+      setContentType("text"); // Reset dropdown too
 
       if (onPostCreated) {
         onPostCreated(response.data.post);
@@ -68,17 +74,62 @@ function CreatePost({ onPostCreated}) {
 
   return (
     <form onSubmit={handleSubmit} style={{ border: "1px solid #ccc", padding: "10px", margin: "10px" }}>
-      <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Post title" />
-      <br />
-      <textarea value={body} onChange={(e) => setBody(e.target.value)} placeholder="What's on your mind?" />
-      <br />
-      <input type="text" value={caption} onChange={(e) => setCaption(e.target.value)} placeholder="Add a caption (optional)" />
-      <br />
-      <input type="file" accept="image/*" onChange={handleFileChange} />
-      <br />
-      <input type="file" accept="video/*" onChange={handleVideoChange} />
-      <br />
+      <input 
+        type="text" 
+        value={title} 
+        onChange={(e) => setTitle(e.target.value)} 
+        placeholder="Post title" 
+      />
+      <br /><br />
+
+      <label>Select Post Type: </label>
+      <select value={contentType} onChange={(e) => setContentType(e.target.value)}>
+        <option value="text">Text / Thoughts</option>
+        <option value="caption">Caption Only</option>
+        <option value="image">Image Upload</option>
+        <option value="video">Video Upload</option>
+      </select>
+      <br /><br />
+
+      {contentType === "text" && (
+        <>
+          <textarea 
+            value={body} 
+            onChange={(e) => setBody(e.target.value)} 
+            placeholder="What's on your mind?" 
+          />
+          <br />
+        </>
+      )}
+
+      {contentType === "caption" && (
+        <>
+          <input 
+            type="text" 
+            value={caption} 
+            onChange={(e) => setCaption(e.target.value)} 
+            placeholder="Add a caption" 
+          />
+          <br />
+        </>
+      )}
+
+      {contentType === "image" && (
+        <>
+          <input type="file" accept="image/*" onChange={handleFileChange} />
+          <br />
+        </>
+      )}
+
+      {contentType === "video" && (
+        <>
+          <input type="file" accept="video/*" onChange={handleVideoChange} />
+          <br />
+        </>
+      )}
+
       {error && <p style={{ color: "red" }}>{error}</p>}
+      
       <button type="submit" disabled={submitting}>
         {submitting ? "Posting..." : "Post"}
       </button>
