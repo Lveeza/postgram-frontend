@@ -1,4 +1,3 @@
-// Feed.jsx
 import { useState, useEffect, useRef, useCallback } from "react";
 import api from "./api";
 import Post from "./Post";

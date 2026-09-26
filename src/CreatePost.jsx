@@ -7,8 +7,7 @@ function CreatePost({ onPostCreated }) {
   const [caption, setCaption] = useState("");
   const [imageFile, setImageFile] = useState(null);
   const [videoFile, setVideoFile] = useState(null);
-  
-  // 1. ADDED THIS LINE:
+
   const [contentType, setContentType] = useState("text");
 
   const [error, setError] = useState("");
@@ -54,13 +53,12 @@ function CreatePost({ onPostCreated }) {
 
       const response = await api.post("/posts", formData);
 
-      // Reset form fields
       setTitle("");
       setBody("");
       setCaption("");
       setImageFile(null);
       setVideoFile(null);
-      setContentType("text"); // Reset dropdown too
+      setContentType("text");
 
       if (onPostCreated) {
         onPostCreated(response.data.post);
@@ -73,30 +71,38 @@ function CreatePost({ onPostCreated }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ border: "1px solid #ccc", padding: "10px", margin: "10px" }}>
-      <input 
-        type="text" 
-        value={title} 
-        onChange={(e) => setTitle(e.target.value)} 
-        placeholder="Post title" 
+    <form
+      onSubmit={handleSubmit}
+      style={{ border: "1px solid #ccc", padding: "10px", margin: "10px" }}
+    >
+      <input
+        type="text"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        placeholder="Post title"
       />
-      <br /><br />
+      <br />
+      <br />
 
       <label>Select Post Type: </label>
-      <select value={contentType} onChange={(e) => setContentType(e.target.value)}>
+      <select
+        value={contentType}
+        onChange={(e) => setContentType(e.target.value)}
+      >
         <option value="text">Text / Thoughts</option>
         <option value="caption">Caption Only</option>
         <option value="image">Image Upload</option>
         <option value="video">Video Upload</option>
       </select>
-      <br /><br />
+      <br />
+      <br />
 
       {contentType === "text" && (
         <>
-          <textarea 
-            value={body} 
-            onChange={(e) => setBody(e.target.value)} 
-            placeholder="What's on your mind?" 
+          <textarea
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            placeholder="What's on your mind?"
           />
           <br />
         </>
@@ -104,11 +110,11 @@ function CreatePost({ onPostCreated }) {
 
       {contentType === "caption" && (
         <>
-          <input 
-            type="text" 
-            value={caption} 
-            onChange={(e) => setCaption(e.target.value)} 
-            placeholder="Add a caption" 
+          <input
+            type="text"
+            value={caption}
+            onChange={(e) => setCaption(e.target.value)}
+            placeholder="Add a caption"
           />
           <br />
         </>
@@ -129,7 +135,7 @@ function CreatePost({ onPostCreated }) {
       )}
 
       {error && <p style={{ color: "red" }}>{error}</p>}
-      
+
       <button type="submit" disabled={submitting}>
         {submitting ? "Posting..." : "Post"}
       </button>

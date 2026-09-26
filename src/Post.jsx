@@ -1,4 +1,3 @@
-// Post.jsx
 import { useState } from "react";
 import api from "./api";
 import CreateComment from "./CreateComment";
