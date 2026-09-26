@@ -1,3 +1,4 @@
+// Feed.jsx
 import { useState, useEffect, useRef, useCallback } from "react";
 import api from "./api";
 import Post from "./Post";
@@ -85,8 +86,6 @@ function Feed() {
     }
   };
 
- 
-
   const handleDeletePost = async (postId) => {
     if (!window.confirm("Delete this post?")) return;
 
@@ -151,27 +150,50 @@ function Feed() {
     };
   }, [fetchNextPage]);
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>{error}</p>;
+  if (loading)
+    return (
+      <div className="flex items-center justify-center min-h-screen text-gray-400">
+        Loading...
+      </div>
+    );
+  if (error)
+    return (
+      <div className="flex items-center justify-center min-h-screen text-red-500">
+        {error}
+      </div>
+    );
 
   return (
-    <div>
-      <Logout />
-      <Stories />
-      {posts.map((post) => (
-        <Post
-          key={post.id}
-          post={post}
-          onLike={handleLike}
-          onFollow={handleFollow}
-          onDelete={handleDeletePost}
-          onUpdate={handleUpdatePost}
-          onCommentCountUp={handleCommentCreated}
-          onCommentCountDown={handleCommentDeleted}
-        />
-      ))}
-      <div ref={observerTarget} style={{ height: "20px" }}>
-        {loadingMore && <p>Loading more...</p>}
+    <div className="bg-gray-50 min-h-screen">
+      <div className="sticky top-0 bg-white border-b border-gray-200 flex items-center justify-between px-4 py-3 z-20">
+        <h1 className="text-xl font-serif italic">Postagram</h1>
+        <Logout />
+      </div>
+
+      <div className="max-w-[470px] mx-auto pt-4">
+        <Stories />
+
+        {posts.map((post) => (
+          <Post
+            key={post.id}
+            post={post}
+            onLike={handleLike}
+            onFollow={handleFollow}
+            onDelete={handleDeletePost}
+            onUpdate={handleUpdatePost}
+            onCommentCountUp={handleCommentCreated}
+            onCommentCountDown={handleCommentDeleted}
+          />
+        ))}
+
+        <div
+          ref={observerTarget}
+          className="h-5 flex items-center justify-center"
+        >
+          {loadingMore && (
+            <p className="text-sm text-gray-400 py-4">Loading more...</p>
+          )}
+        </div>
       </div>
     </div>
   );
