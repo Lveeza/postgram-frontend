@@ -35,11 +35,11 @@ function Stories() {
   const [activeStoryIndex, setActiveStoryIndex] = useState(0);
   const [viewedStoryIds, setViewedStoryIds] = useState(new Set());
 
-  // NEW: controls the "preview & share" modal, and what it opens with
+  // controls the "preview & share" modal, and what it opens with
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [pickedFiles, setPickedFiles] = useState([]);
   const [pickedType, setPickedType] = useState("image");
-  const fileInputRef = useRef(null); // NEW: the real, hidden file input
+  const fileInputRef = useRef(null); // the real, hidden file input
 
   const activeGroup =
     activeGroupIndex !== null ? storyGroups[activeGroupIndex] : null;
@@ -224,7 +224,7 @@ function Stories() {
       className={`w-16 h-16 rounded-full p-[2px] ${
         hasUnviewed
           ? "bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-500"
-          : "bg-gray-300" // <-- this is the "uncolored once viewed" behavior you asked about
+          : "bg-gray-300" 
       }`}
     >
       <div className="w-full h-full rounded-full bg-white p-[2px]">

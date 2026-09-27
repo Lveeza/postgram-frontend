@@ -16,6 +16,6 @@ function Logout() {
   }
 };
 
-  return <button onClick={handleLogout}>Logout</button>;
+  return <button onClick={handleLogout} className="font-medium cursor-pointer">Logout</button>;
 }
 export default Logout;

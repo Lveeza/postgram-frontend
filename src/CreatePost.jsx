@@ -1,24 +1,45 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import api from "./api";
 
 function CreatePost({ onPostCreated }) {
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
-  const [caption, setCaption] = useState("");
-  const [imageFile, setImageFile] = useState(null);
-  const [videoFile, setVideoFile] = useState(null);
-
-  const [contentType, setContentType] = useState("text");
+  const [mediaItems, setMediaItems] = useState([]); // [{id, type, file?, content?, previewUrl?}]
+  const [textDraft, setTextDraft] = useState("");
+  const [isAddingText, setIsAddingText] = useState(false);
 
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  const handleFileChange = (e) => {
-    setImageFile(e.target.files[0]);
+  const fileInputRef = useRef(null);
+
+  const handleFilesChange = (e) => {
+    const files = Array.from(e.target.files);
+
+    const newItems = files.map((file) => ({
+      id: `${file.name}-${file.lastModified}-${Math.random()}`, 
+      type: file.type.startsWith("video") ? "video" : "image",
+      file,
+      previewUrl: URL.createObjectURL(file),
+    }));
+
+    setMediaItems((prev) => [...prev, ...newItems]);
+    e.target.value = ""; 
   };
 
-  const handleVideoChange = (e) => {
-    setVideoFile(e.target.files[0]);
+  const handleAddTextSlide = () => {
+    if (textDraft.trim() === "") return;
+
+    setMediaItems((prev) => [
+      ...prev,
+      { id: `text-${Date.now()}`, type: "text", content: textDraft },
+    ]);
+    setTextDraft("");
+    setIsAddingText(false);
+  };
+
+  const handleRemoveItem = (id) => {
+    setMediaItems((prev) => prev.filter((item) => item.id !== id));
   };
 
   const handleSubmit = async (e) => {
@@ -31,34 +52,19 @@ function CreatePost({ onPostCreated }) {
       formData.append("title", title);
       formData.append("body", body);
 
-      let mediaIndex = 0;
-
-      if (caption.trim() !== "") {
-        formData.append(`media[${mediaIndex}][type]`, "text");
-        formData.append(`media[${mediaIndex}][content]`, caption);
-        mediaIndex++;
-      }
-
-      if (imageFile) {
-        formData.append(`media[${mediaIndex}][type]`, "image");
-        formData.append(`media[${mediaIndex}][content]`, imageFile);
-        mediaIndex++;
-      }
-
-      if (videoFile) {
-        formData.append(`media[${mediaIndex}][type]`, "video");
-        formData.append(`media[${mediaIndex}][content]`, videoFile);
-        mediaIndex++;
-      }
+      mediaItems.forEach((item, index) => {
+        formData.append(`media[${index}][type]`, item.type);
+        formData.append(
+          `media[${index}][content]`,
+          item.type === "text" ? item.content : item.file,
+        );
+      });
 
       const response = await api.post("/posts", formData);
 
       setTitle("");
       setBody("");
-      setCaption("");
-      setImageFile(null);
-      setVideoFile(null);
-      setContentType("text");
+      setMediaItems([]);
 
       if (onPostCreated) {
         onPostCreated(response.data.post);
@@ -71,73 +77,125 @@ function CreatePost({ onPostCreated }) {
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      style={{ border: "1px solid #ccc", padding: "10px", margin: "10px" }}
-    >
+    <form onSubmit={handleSubmit} className="p-4">
       <input
         type="text"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         placeholder="Post title"
+        className="w-full text-sm font-semibold outline-none placeholder-gray-400 mb-2"
       />
-      <br />
-      <br />
 
-      <label>Select Post Type: </label>
-      <select
-        value={contentType}
-        onChange={(e) => setContentType(e.target.value)}
-      >
-        <option value="text">Text / Thoughts</option>
-        <option value="caption">Caption Only</option>
-        <option value="image">Image Upload</option>
-        <option value="video">Video Upload</option>
-      </select>
-      <br />
-      <br />
+      <textarea
+        value={body}
+        onChange={(e) => setBody(e.target.value)}
+        placeholder="What's on your mind?"
+        rows={2}
+        className="w-full text-sm outline-none placeholder-gray-400 resize-none mb-3"
+      />
 
-      {contentType === "text" && (
-        <>
-          <textarea
-            value={body}
-            onChange={(e) => setBody(e.target.value)}
-            placeholder="What's on your mind?"
-          />
-          <br />
-        </>
-      )}
+      {/* Media strip */}
+      <div className="flex gap-2 overflow-x-auto pb-1 mb-3">
+        {/* Add-media tile */}
+        <button
+          type="button"
+          onClick={() => fileInputRef.current.click()}
+          className="shrink-0 w-20 h-20 rounded-lg border-2 border-dashed border-gray-300
+                     flex items-center justify-center text-gray-400 text-2xl"
+        >
+          +
+        </button>
 
-      {contentType === "caption" && (
-        <>
+        {/* Add-text tile */}
+        <button
+          type="button"
+          onClick={() => setIsAddingText(true)}
+          className="shrink-0 w-20 h-20 rounded-lg border-2 border-gray-300
+                     flex items-center justify-center text-gray-500 font-serif text-lg"
+        >
+          Aa
+        </button>
+
+        {/* Added items */}
+        {mediaItems.map((item) => (
+          <div
+            key={item.id}
+            className="relative shrink-0 w-20 h-20 rounded-lg overflow-hidden bg-gray-100"
+          >
+            {item.type === "image" && (
+              <img src={item.previewUrl} alt="" className="w-full h-full object-cover" />
+            )}
+            {item.type === "video" && (
+              <video src={item.previewUrl} className="w-full h-full object-cover" />
+            )}
+            {item.type === "text" && (
+              <div className="w-full h-full flex items-center justify-center p-1 text-center text-[10px] text-gray-600">
+                {item.content}
+              </div>
+            )}
+            <button
+              type="button"
+              onClick={() => handleRemoveItem(item.id)}
+              className="absolute top-0.5 right-0.5 w-5 h-5 rounded-full bg-black/60
+                         text-white text-xs flex items-center justify-center"
+            >
+              ×
+            </button>
+          </div>
+        ))}
+      </div>
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*,video/*"
+        multiple
+        onChange={handleFilesChange}
+        className="hidden"
+      />
+
+      {/* Inline text-slide composer */}
+      {isAddingText && (
+        <div className="mb-3 border border-gray-200 rounded-lg p-2">
           <input
             type="text"
-            value={caption}
-            onChange={(e) => setCaption(e.target.value)}
-            placeholder="Add a caption"
+            value={textDraft}
+            onChange={(e) => setTextDraft(e.target.value)}
+            placeholder="Type a text slide..."
+            className="w-full text-sm outline-none mb-2"
+            autoFocus
           />
-          <br />
-        </>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={handleAddTextSlide}
+              className="text-blue-500 text-sm font-semibold"
+            >
+              Add
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setTextDraft("");
+                setIsAddingText(false);
+              }}
+              className="text-gray-400 text-sm"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
       )}
 
-      {contentType === "image" && (
-        <>
-          <input type="file" accept="image/*" onChange={handleFileChange} />
-          <br />
-        </>
-      )}
+      {error && <p className="text-red-500 text-xs mb-2">{error}</p>}
 
-      {contentType === "video" && (
-        <>
-          <input type="file" accept="video/*" onChange={handleVideoChange} />
-          <br />
-        </>
-      )}
-
-      {error && <p style={{ color: "red" }}>{error}</p>}
-
-      <button type="submit" disabled={submitting}>
-        {submitting ? "Posting..." : "Post"}
+      <button
+        type="submit"
+        disabled={submitting}
+        className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold
+                   text-sm rounded-lg py-2 disabled:opacity-50"
+      >
+        {submitting ? "Posting..." : "Share"}
       </button>
     </form>
   );

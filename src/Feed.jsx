@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import api from "./api";
 import Post from "./Post";
 import Stories from "./Stories";
-import Logout from "./Logout";
+import Header from "./Header";
 
 function Feed() {
   const [posts, setPosts] = useState([]);
@@ -164,11 +164,7 @@ function Feed() {
 
   return (
     <div className="bg-gray-50 min-h-screen">
-      <div className="sticky top-0 bg-white border-b border-gray-200 flex items-center justify-between px-4 py-3 z-20">
-        <h1 className="text-xl font-serif italic">Postagram</h1>
-        <Logout />
-      </div>
-
+      <Header />
       <div className="max-w-[470px] mx-auto pt-4">
         <Stories />
 
