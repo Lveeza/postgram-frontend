@@ -1,8 +1,12 @@
 import Logout from "./Logout";
 import { useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
+
 
 function Header() {
   const navigate = useNavigate();
+  const { userId } = useParams();
+
   return (
     <div className="sticky top-0 bg-white border-b border-gray-200 flex items-center justify-between px-4 py-3 z-20">
       <h1
@@ -12,7 +16,7 @@ function Header() {
         Postagram
       </h1>
       <div className="flex justify-center items-center gap-10">
-        <button onClick={() => navigate("/profile/:userId")}>
+        <button onClick={() => navigate(`/profile/${userId}`)}>
           <svg
             xmlns="http://w3.org"
             width="24"
