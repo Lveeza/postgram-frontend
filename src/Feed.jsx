@@ -6,7 +6,8 @@ import Header from "./Header";
 
 function Feed() {
   const [posts, setPosts] = useState([]);
-const [nextCursor, setNextCursor] = useState(null);   
+  const [nextCursor, setNextCursor] = useState(null);
+  const [loading, setLoading] = useState(true);   
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState("");
 
@@ -14,15 +15,15 @@ const [nextCursor, setNextCursor] = useState(null);
 
   const loadingRef = useRef(false);
 
-const getCursor = (url) =>
-  url ? new URL(url).searchParams.get("cursor") : null;
+  const getCursor = (url) =>
+    url ? new URL(url).searchParams.get("cursor") : null;
 
   useEffect(() => {
     const fetchPosts = async () => {
       try {
         const response = await api.get("/posts");
         setPosts(response.data.data);
-        setNextCursor(response.data.links.next);
+        setNextCursor(getCursor(response.data.links.next));
       } catch (err) {
         setError("Failed to load posts");
       } finally {
@@ -33,23 +34,23 @@ const getCursor = (url) =>
   }, []);
 
   const fetchNextPage = useCallback(async () => {
-  if (!nextCursor || loadingRef.current) return;
-  loadingRef.current = true;
-  setLoadingMore(true);
-  try {
-    const response = await api.get("/posts", {
-      params: { cursor: nextCursor },
-    });
-    setPosts((prev) => [...prev, ...response.data.data]);
-    setNextCursor(getCursor(response.data.links.next));
-  } catch (err) {
-    console.error("Failed to load more posts", err);
-    setNextCursor(null);   
-  } finally {
-    loadingRef.current = false;
-    setLoadingMore(false);
-  }
-}, [nextCursor]);
+    if (!nextCursor || loadingRef.current) return;
+    loadingRef.current = true;
+    setLoadingMore(true);
+    try {
+      const response = await api.get("/posts", {
+        params: { cursor: nextCursor },
+      });
+      setPosts((prev) => [...prev, ...response.data.data]);
+      setNextCursor(getCursor(response.data.links.next));
+    } catch (err) {
+      console.error("Failed to load more posts", err);
+      setNextCursor(null);
+    } finally {
+      loadingRef.current = false;
+      setLoadingMore(false);
+    }
+  }, [nextCursor]);
 
   const handleLike = async (postId) => {
     try {
