@@ -31,8 +31,8 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route path="/notifications" element={<Notifications />} />
       </Routes>
-      <Route path="/notifications" element={<Notifications />} />
     </BrowserRouter>
   );
 }
