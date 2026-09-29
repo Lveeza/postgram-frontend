@@ -1,5 +1,6 @@
 import Logout from "./Logout";
 import { useNavigate } from "react-router-dom";
+import Notifications from "./Notifications";
 
 function Header() {
   const navigate = useNavigate();
@@ -49,6 +50,7 @@ function Header() {
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
           </svg>
         </button>
+        <Notifications onClick={() => navigate("/notifications")} />
         <Logout />
       </div>
     </div>

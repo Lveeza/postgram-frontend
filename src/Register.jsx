@@ -7,17 +7,21 @@ function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setLoading(true);
 
     try {
       await api.post("/register", { name, email, password });
       navigate("/login");
     } catch (err) {
       setError(err.response?.data?.message || "Registration failed");
+    }finally{
+      setLoading(false);
     }
   };
 
@@ -70,10 +74,11 @@ function Register() {
 
             <button
               type="submit"
+              disabled={loading}
               className="bg-blue-500 hover:bg-blue-600 text-white font-semibold
-                         text-sm rounded-lg py-1.5 mt-2 transition-colors"
+                         text-sm rounded-lg py-1.5 mt-2 transition-colors disabled:opacity-50"
             >
-              Sign up
+              {loading ? "Signing up..." : "Sign up"}
             </button>
           </form>
         </div>

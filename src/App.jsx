@@ -5,6 +5,7 @@ import Register from "./Register";
 import Search from "./Search";
 import ProtectedRoute from "./ProtectedRoute";
 import Profile from "./Profile";
+import Notifications from "./Notifications";
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
           }
         />
       </Routes>
+      <Route path="/notifications" element={<Notifications />} />
     </BrowserRouter>
   );
 }

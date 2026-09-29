@@ -6,11 +6,13 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setLoading(true);
 
     try {
       const response = await api.post("/login", { email, password });
@@ -24,6 +26,8 @@ function Login() {
       navigate("/feed");
     } catch (err) {
       setError(err.response?.data?.message || "Login failed");
+    }finally {
+      setLoading(false);
     }
   };
 
@@ -60,10 +64,11 @@ function Login() {
 
             <button
               type="submit"
+              disabled={loading}
               className="bg-blue-500 hover:bg-blue-600 text-white font-semibold
-                         text-sm rounded-lg py-1.5 mt-3 transition-colors"
+                         text-sm rounded-lg py-1.5 mt-3 transition-colors disabled:opacity-50"
             >
-              Log In
+              {loading ? "Logging in..." : "Log In"}
             </button>
           </form>
         </div>
