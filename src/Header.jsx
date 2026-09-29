@@ -15,7 +15,10 @@ function Header() {
         Postagram
       </h1>
       <div className="flex justify-center items-center gap-10">
-        <button onClick={() => navigate(`/profile/${userId}`)}>
+        <button
+          onClick={() => navigate(`/profile/${userId}`)}
+          className="cursor-pointer"
+        >
           <svg
             xmlns="http://w3.org"
             width="24"

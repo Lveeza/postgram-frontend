@@ -102,7 +102,7 @@ function Notifications() {
 
   return (
     <div className="relative" ref={dropdownRef}>
-      <button onClick={toggleOpen} className="relative">
+      <button onClick={toggleOpen} className="relative cursor-pointer">
         <BellIcon />
         {unreadCount > 0 && (
           <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-semibold rounded-full w-4 h-4 flex items-center justify-center">
