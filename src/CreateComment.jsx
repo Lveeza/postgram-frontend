@@ -1,18 +1,22 @@
-
 import { useState } from "react";
 import api from "./api";
 
 function CreateComment({ postId, onCommentCreated }) {
   const [content, setContent] = useState("");
+  const [posting, setPosting] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setPosting(true);
+
     try {
       const response = await api.post(`/posts/${postId}/comments`, { content });
       onCommentCreated(response.data.comment);
       setContent("");
     } catch (err) {
       alert(err.response?.data?.message || "Failed to add comment");
+    } finally {
+      setPosting(false);
     }
   };
 
@@ -29,10 +33,10 @@ function CreateComment({ postId, onCommentCreated }) {
       />
       <button
         type="submit"
-        disabled={content.trim() === ""}
+        disabled={content.trim() === "" || posting}
         className="text-blue-500 font-semibold text-sm disabled:text-blue-200 disabled:cursor-not-allowed"
       >
-        Post
+        {posting ? "Posting..." : "Post"}
       </button>
     </form>
   );

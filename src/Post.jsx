@@ -125,12 +125,16 @@ function Post({
       {/* Header */}
       <div className="flex items-center justify-between px-3 py-2.5">
         <div className="flex items-center gap-2 text-sm">
-          {post.author.avatar_url && (
+          {post.author.avatar_url ? (
             <img
               src={post.author.avatar_url}
               alt={post.author.name}
               className="w-8 h-8 rounded-full object-cover"
             />
+          ) : (
+            <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center font-semibold text-gray-600">
+              {post.author.name.charAt(0).toUpperCase()}
+            </div>
           )}
           <Link to={`/profile/${post.author.id}`} className="font-semibold">
             {post.author.name}
